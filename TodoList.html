@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Todo List</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.2.1/react.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.2.1/react-dom.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.18.1/babel.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+</head>
+ 
+<style>
+
+	body {
+    
+    background-color: #004b97;
+
+	}
+
+	.container{
+
+		margin-top: 30px;
+		padding: 30px;
+		background-color: #f0f0f0;
+	}
+
+	.btn{
+
+	font-size: 8px;
+
+	}
+
+	#text{
+
+		margin: 0;
+
+	}
+
+	#input-text{
+
+		margin: 10;
+
+	}
+
+	.input-field{
+
+		margin-bottom : 10px;
+
+	}
+
+	.list{
+
+		background-color: white;
+		border: 0.1px none #f0f0f0;
+		border-radius: 5px;
+		padding-top: 20px;
+		padding-bottom: 10px;
+		box-shadow: 0px 0.5px 0.5px grey;
+
+	}
+
+	[type="checkbox"]+label:before{
+
+		border:0px;
+
+	}
+    	
+</style>
+<body>
+	
+		
+	<div id="app"></div>
+		
+
+	<script type="text/babel">
+
+
+
+
+class TodoList extends React.Component{
+
+		constructor(props){
+			super(props);
+			
+		
+			this.state = {
+				items:[]
+			};
+
+		}
+
+	  componentWillReceiveProps(props) {
+	    
+	    this.setState({items:props.items});
+	  
+	  }
+
+	 
+
+	render(){
+
+
+		let items = this.state.items.map((item) => {
+
+				 
+		return <div className="row list">
+					<div className="input-field col m8 s12">
+						<input value={item.text} disabled={item.status} id={item.id +'-'+ 1} onChange={()=>this.props.edit(item.id)} />
+					</div>
+					<div className="col m1 s3">
+						<button  className="btn-floating btn-large waves-effect waves-light"  onClick={()=>this.props.status(item.id,item.status)} ><i className="material-icons">check</i></button>
+					</div>
+					<div className=" col m1 s3">
+						<button  className="btn-floating btn-large waves-effect waves-light red" value={item.id} onClick={()=>this.props.delete(item.id)}>
+							<i className="material-icons">delete</i>remove</button>
+					</div>
+					<div className="col m1 s3"  >
+						<p>
+							<input type="checkbox"  id="filled-in-box" checked={item.status} />
+							<label htmlFor="filled-in-box"></label>
+						</p>
+					</div>
+				</div>
+
+				})
+
+			return (<div>
+						{items}
+					</div>)
+
+
+	}
+
+}
+	
+	class Todo extends React.Component{
+
+		constructor(props){
+			
+			super(props);
+			this.changeText = this.changeText.bind(this);
+			this.onSubmit = this.onSubmit.bind(this);
+			this.delete = this.delete.bind(this);
+			this.changeStatus = this.changeStatus.bind(this);
+			this.clearDone = this.clearDone.bind(this);
+			this.filterDone = this.filterDone.bind(this);
+			this.filterUndone = this.filterUndone.bind(this);
+			this.showAll = this.showAll.bind(this);
+			this.editText = this.editText.bind(this);
+			this.state = {
+				items:[],
+				fullItems:[],
+				text:'',
+				id : 0
+			};
+		}
+
+		changeText(e){
+
+			this.setState({text:e.target.value});
+
+		}
+
+
+
+		editText(id){
+
+			const identifier = id +'-'+ 1;
+
+			const newitems = this.state.items.map((item)=>{
+
+					if(item.id===id){
+						item.text  = $('#'+identifier).val();
+						return item;
+					}else{
+					return item;
+				}
+			});
+
+			const newfull = this.state.fullItems.map((item)=>{
+
+					if(item.id===id){
+						item.text  = $('#'+identifier).val();
+						return item;
+					}else{
+					return item;
+				}
+			});
+
+
+			this.setState({
+				items:newitems,
+				fullItems:newfull
+			});
+
+		}
+
+
+		changeStatus(id,status){
+
+			const newitems = this.state.items.map((item) => {
+
+					if(item.id===id){
+						item.status = !status;
+						return item;
+
+					}else{
+						return item;
+					}	
+				});
+
+			const newfull = this.state.fullItems.map((item)=>{
+
+				if(item.id===id){	
+					item.status = !status;
+					return item;
+				}else{
+					return item;
+				}
+
+			});
+
+
+		this.setState({
+				items:newitems,
+				fullItems:newfull
+			});
+		
+
+		}
+
+
+
+		delete(id){
+
+			this.setState({
+
+				items:this.state.items.filter((item) => id !== item.id),
+				fullItems:this.state.fullItems.filter((item) => id !== item.id)
+
+			});
+		}
+
+		clearDone(){
+
+			this.setState({
+
+				items: this.state.items.filter((item) => item.status === false),
+				fullItems:	this.state.items.filter((item) => item.status === false)
+
+			})
+
+		}
+
+		
+		showAll(){
+
+			const full = this.state.fullItems.slice(0);
+			
+			this.setState({
+
+					items:full
+					
+				});			
+
+		}
+
+	
+
+		filterUndone(){
+
+			const full = this.state.fullItems.slice(0);
+
+			this.setState({
+
+					items:full.filter((item) => item.status === false)
+					
+				});
+
+				
+
+		}
+
+
+		filterDone(){
+
+			const full = this.state.fullItems.slice(0);
+
+			this.setState({
+
+					items:full.filter((item) => item.status === true)
+					
+				});
+
+				
+
+		}
+
+		componentDidUpdate() {
+
+			console.log(this.state.items);
+			console.log(this.state.fullItems);
+    
+  		}
+
+		
+		onSubmit(){
+
+
+			this.state.id += 1;
+
+			const newText = this.state.text;
+
+			const newItem = this.state.items.concat([{text:newText,id:this.state.id,status:false}]);
+			const newfull = this.state.fullItems.concat([{text:newText,id:this.state.id,status:false}]);
+
+			this.setState({text:'',items:newItem,fullItems:newfull,id:this.state.id});
+
+		}
+		
+		
+		render(){
+
+			return (  <div className="container">
+						<div className="row">
+							<div className="col s12 m12">
+								<h3>Todo List</h3>
+							</div>
+						</div>
+						
+						<div className="row">
+							<div className="input-field col m7 s10" id="input-text">
+								<input  id="text" type="text" onChange={this.changeText} value={this.state.text} />
+							</div>
+							<div className="col m2 s5">
+								<button  className="btn blue waves-effect waves-light" onClick={this.onSubmit}>新增list</button>
+							</div>
+							<div className="col m3 s5">
+								<button  className="btn blue waves-effect waves-light" onClick ={this.clearDone} >清除已完成</button>
+							</div>
+						</div>
+						<div className="row">
+							<div className="col m3 s4">
+							 <p>
+								<input className="with-gap" name="filter" type="radio" id="all"  />
+    							<label htmlFor="all" onClick={this.showAll}>全部</label>
+    						 </p>		
+							</div>
+							<div className="col m3 s4">
+							 <p>
+    							<input className="with-gap" name="filter" type="radio" id="done"  />
+    							<label htmlFor="done" onClick={this.filterDone} >已完成</label>
+    						 </p>		
+							</div>
+							<div className="col m3 s4">
+							 <p>
+    							<input className="with-gap" name="filter" type="radio" id="Undone"  />
+    							<label htmlFor="Undone" onClick={this.filterUndone} >未完成</label>
+    						 </p>		
+							</div>
+						</div>
+						<TodoList items ={this.state.items} full = {this.state.fullItems}  delete={this.delete} status={this.changeStatus}  edit={this.editText} for="filled-in-box"  />
+					  </div>
+					);
+
+		}
+
+	}
+
+	ReactDOM.render(<Todo />,document.getElementById('app'));
+
+	</script>
+
+</body>
+</html>
