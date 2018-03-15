@@ -8,11 +8,10 @@
   <link rel="stylesheet" href="./todolist.css">
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.2.1/react.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.2.1/react-dom.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.18.1/babel.min.js"></script>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 </head>
 
 <body>
@@ -23,10 +22,8 @@
 
 	<script type="text/babel">
 
-
-
-
-class TodoList extends React.Component{
+	
+	class TodoList extends React.Component{
 
 		constructor(props){
 			super(props);
@@ -45,12 +42,9 @@ class TodoList extends React.Component{
 	  }
 
 	 
-
 	render(){
 
-
 		let items = this.state.items.map((item) => {
-
 				 
 		return <div className="row list">
 					<div className="input-field col m8 s12">
@@ -77,10 +71,11 @@ class TodoList extends React.Component{
 						{items}
 					</div>)
 
+		}
 
 	}
 
-}
+
 	
 	class Todo extends React.Component{
 
@@ -94,13 +89,15 @@ class TodoList extends React.Component{
 			this.clearDone = this.clearDone.bind(this);
 			this.filterDone = this.filterDone.bind(this);
 			this.filterUndone = this.filterUndone.bind(this);
+			this.search = this.search.bind(this);
 			this.showAll = this.showAll.bind(this);
 			this.editText = this.editText.bind(this);
 			this.state = {
 				items:[],
 				fullItems:[],
 				text:'',
-				id : 0
+				id : 0,
+				Stext:''
 			};
 		}
 
@@ -136,7 +133,6 @@ class TodoList extends React.Component{
 				}
 			});
 
-
 			this.setState({
 				items:newitems,
 				fullItems:newfull
@@ -169,19 +165,15 @@ class TodoList extends React.Component{
 
 			});
 
-
-		this.setState({
+			this.setState({
 				items:newitems,
 				fullItems:newfull
 			});
-		
-
 		}
 
 
 
 		delete(id){
-
 			this.setState({
 
 				items:this.state.items.filter((item) => id !== item.id),
@@ -190,15 +182,14 @@ class TodoList extends React.Component{
 			});
 		}
 
-		clearDone(){
 
+		clearDone(){
 			this.setState({
 
 				items: this.state.items.filter((item) => item.status === false),
 				fullItems:	this.state.items.filter((item) => item.status === false)
 
 			})
-
 		}
 
 		
@@ -206,11 +197,35 @@ class TodoList extends React.Component{
 
 			const full = this.state.fullItems.slice(0);
 			
-			this.setState({
+			if( this.state.Stext!==''||this.state.Stext!==null ){
+
+
+						 const newdata = full.filter((item) => {
+
+								if(item.text.toString().toLowerCase().indexOf(this.state.Stext.toLowerCase())!== -1){
+
+									return true;
+								}else{
+
+									return false;
+								}
+					});
+
+					this.setState({
+
+					items:newdata
+					
+					});
+
+			}else{
+
+				this.setState({
 
 					items:full
 					
-				});			
+				});
+
+			}	
 
 		}
 
@@ -220,14 +235,37 @@ class TodoList extends React.Component{
 
 			const full = this.state.fullItems.slice(0);
 
-			this.setState({
+
+			if( this.state.Stext!==''||this.state.Stext!==null ){
+
+					const data = full.filter((item) => item.status === false);
+
+
+						 const newdata = data.filter((item) => {
+
+								if(item.text.toString().toLowerCase().indexOf(this.state.Stext.toLowerCase())!== -1){
+
+									return true;
+								}else{
+
+									return false;
+								}
+					});
+
+					this.setState({
+
+					items:newdata
+					
+					});
+
+			}else{
+
+				this.setState({
 
 					items:full.filter((item) => item.status === false)
 					
 				});
-
-				
-
+			}
 		}
 
 
@@ -235,26 +273,63 @@ class TodoList extends React.Component{
 
 			const full = this.state.fullItems.slice(0);
 
-			this.setState({
+			if( this.state.Stext!==''||this.state.Stext!==null ){
+
+					const data = full.filter((item) => item.status === true);
+
+
+						 const newdata = data.filter((item) => {
+
+								if(item.text.toString().toLowerCase().indexOf(this.state.Stext.toLowerCase())!== -1){
+
+									return true;
+								}else{
+
+									return false;
+								}
+					});
+
+					this.setState({
+
+					items:newdata
+					
+					});
+
+			}else{
+
+				this.setState({
 
 					items:full.filter((item) => item.status === true)
 					
 				});
-
-				
-
+			}
 		}
 
-		componentDidUpdate() {
 
-			console.log(this.state.items);
-			console.log(this.state.fullItems);
-    
-  		}
+		search(e){
 
-		
+				const data = this.state.fullItems.filter((item) => {
+
+						if(item.text.toString().toLowerCase().indexOf(e.target.value.toLowerCase())!== -1){
+
+							return true;
+						}else{
+
+							return false;
+						}
+
+				});
+
+				this.setState({
+
+					items:data,
+					Stext:e.target.value
+					
+				});
+
+		}
+						
 		onSubmit(){
-
 
 			this.state.id += 1;
 
@@ -281,27 +356,32 @@ class TodoList extends React.Component{
 							<div className="input-field col m7 s10" id="input-text">
 								<input  id="text" type="text" onChange={this.changeText} value={this.state.text} />
 							</div>
-							<div className="col m2 s5">
+							<div className="col m2 s6">
 								<button  className="btn blue waves-effect waves-light" onClick={this.onSubmit}>新增list</button>
 							</div>
-							<div className="col m3 s5">
+							<div className="col m3 s6">
 								<button  className="btn blue waves-effect waves-light" onClick ={this.clearDone} >清除已完成</button>
 							</div>
 						</div>
 						<div className="row">
-							<div className="col m3 s4">
+							<div className="input-field col m6 s10">
+								<i className="material-icons prefix">search</i>
+								<input  placeholder="搜尋" type="text" onChange={this.search} id="search" />
+								<label className="label-icon"></label>
+							</div>
+							<div className="col m2 s4">
 							 <p>
 								<input className="with-gap" name="filter" type="radio" id="all"  />
     							<label htmlFor="all" onClick={this.showAll}>全部</label>
     						 </p>		
 							</div>
-							<div className="col m3 s4">
+							<div className="col m2 s4">
 							 <p>
     							<input className="with-gap" name="filter" type="radio" id="done"  />
     							<label htmlFor="done" onClick={this.filterDone} >已完成</label>
     						 </p>		
 							</div>
-							<div className="col m3 s4">
+							<div className="col m2 s4">
 							 <p>
     							<input className="with-gap" name="filter" type="radio" id="Undone"  />
     							<label htmlFor="Undone" onClick={this.filterUndone} >未完成</label>
